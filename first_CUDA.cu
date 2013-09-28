@@ -11,7 +11,7 @@ bool InitCUDA(){
 
 	cudaGetDeviceCount(&count);
 	if(count == 0){
-		fprintf(stdeer, "There is no device.\n");
+		fprintf(stderr, "There is no device.\n");
 		return false;
 	}
 
@@ -26,7 +26,7 @@ bool InitCUDA(){
 	} 
 
 	if(i == count){
-		fprintf(stdeer, "There is no device supporting CUDA 1.x.\n");
+		fprintf(stderr, "There is no device supporting CUDA 1.x.\n");
 		return false;
 	}
 
@@ -35,17 +35,19 @@ bool InitCUDA(){
 	return true;
 }
 
-void GenerateNumber(int *number, int size){
+void GenerateNumber(int* number, int size){
 	for(int i = 0; i < size; i++){
 		number[i] = rand() % 10;
 	}
 }
 
-_global_static void sumOfSquares(int *num, int *result， clock_t *time){
+__global__ void sumOfSquares(int* num, int* result, clock_t* time)
+{
 	int sum = 0;
 	int i;
+	clock_t start = clock();
 	for(i = 0; i < DATA_SIZE; i++){
-		sum += num[i]*num[i];
+		sum += num[i] * num[i];
 	}
 	*result = sum;
 	*time = clock() - start;
@@ -61,17 +63,19 @@ int main(){
 
 	GenerateNumber(data, DATA_SIZE);
 
-	int* gpudata, int* result;
-	cudaMallo((void**) &gpudata, sizeof(int)*DATA_SIZE);
-	cudaMallo((void**) &result, sizeof(int));
+	int* gpudata, *result;
+	clock_t* time;
+	cudaMalloc((void**) &gpudata, sizeof(int) * DATA_SIZE);
+	cudaMalloc((void**) &result, sizeof(int));
+	cudaMalloc((void**) &time, sizeof(clock_t));
 	cudaMemcpy(gpudata, data, sizeof(int)*DATA_SIZE, cudaMemcpyHostToDevice);
 
 	
-	sumofSquares<<<1, 1, 0>>>(gpudata, result, time);
+	sumOfSquares<<<1, 1, 0>>>(gpudata, result, time);
 	int sum;
 	clock_t time_used;
 	cudaMemcpy(&sum, result, sizeof(int), cudaMemcpyDeviceToHost);
-	cudaMemcpy(&time_used, sizeof(clock_t), cudaMemcpyDeviceToHost);
+	cudaMemcpy(&time_used, time, sizeof(clock_t), cudaMemcpyDeviceToHost);
 	cudaFree(gpudata);
 	cudaFree(result);
 
