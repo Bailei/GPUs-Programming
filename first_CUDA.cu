@@ -8,6 +8,7 @@ int data[DATA_SIZE];
 
 bool InitCUDA(){
 	int count;
+	cudaDeviceProp prop;
 
 	cudaGetDeviceCount(&count);
 	if(count == 0){
@@ -17,7 +18,6 @@ bool InitCUDA(){
 
 	int i;
 	for(i = 0; i < count; i++){
-		cudaDeviceProp prop;
 		if(cudaGetDeviceProperties(&prop, i) == cudaSuccess){
 			if(prop.major >= 1){
 				break;
