@@ -44,12 +44,12 @@ void matgen(float* a, int n){
 __global__ void MatrixMulKernel(float* Md, float* Nd, float* Pd, clock_t* time){
 	
 	int tx = threadIdx.x;
-	int ty = threadIdy.y;
+	int ty = threadIdx.y;
 	float Pvalue = 0;
 	clock_t start = clock();
 	for(int k = 0; k < X; k++){
-		float Mdelement = Md[ty * X + k];
-		float Ndelement = Nd[k * X + tx];
+		float Mdelement = Md[tx * X + k];
+		float Ndelement = Nd[k * X + ty];
 		Pvalue += Mdelement * Ndelement;
 	}
 	Pd[ty * X + tx] = Pvalue;
@@ -97,7 +97,7 @@ int main(){
         if(i % X  == 0){
             printf("\n");
         }
-        printf("%d ", P[i]);
+        printf("%f ", P[i]);
 	}
 	printf("\n");
 	printf("time: %ldms", time_used);
