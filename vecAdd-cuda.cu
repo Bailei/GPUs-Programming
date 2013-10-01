@@ -2,9 +2,7 @@
 #include<stdlib.h>
 #include<cuda_runtime.h>
 
-#define W 100
-#define THREAD_NUM 512
-#define BLOCK_NUM 32
+#define W 5000000
 
 bool InitCUDA(){
 	int count;
@@ -41,12 +39,9 @@ void vector_gen(float* a, int size){
 	}
 }
 
-__global__ void vecAddkernel(float* A_d, float* B_d, float* C_d, int n, clock_t* time){
-	clock_t start = clock();
-	int tx = threadIdx.x;
-	int i = tx;
-	if(i < n) C_d[i] = A_d[i] + B_d[i];
-	*time = clock() - start;
+__global__ void vecAddkernel(float* A_d, float* B_d, float* C_d, int n){
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	C_d[i] = A_d[i] + B_d[i];
 }
 
 int main(){
@@ -55,6 +50,7 @@ int main(){
 	}
 	printf("CUDA initialized.\n");
 
+	clock_t start = clock();
 	float* A, *B, *C;
 	A = (float*) malloc(sizeof(int) * W);
 	B = (float*) malloc(sizeof(int) * W);
@@ -64,32 +60,32 @@ int main(){
 	
 	int size = W * sizeof(float);
 	float* A_d, *B_d, *C_d;
-	clock_t *time;
-	clock_t time_used;
 
 	cudaMalloc((void**) &A_d, size);
 	cudaMemcpy(A_d, A, size, cudaMemcpyHostToDevice);
 	cudaMalloc((void**) &B_d, size);
 	cudaMemcpy(B_d, B, size, cudaMemcpyHostToDevice);
-	cudaMalloc((void**) &time, sizeof(clock_t));
-
 	cudaMalloc((void**) &C_d, size);
 
-	vecAddkernel<<<1, W>>>(A_d, B_d, C_d, W, time);
+	dim3 dimBlock(512, 1);
+	dim3 dimGrid(ceil(float(W)/512), 1);
+
+	vecAddkernel<<<dimGrid, dimBlock>>>(A_d, B_d, C_d, W);
+	clock_t end = clock() - start;
 
 	cudaMemcpy(C, C_d, size, cudaMemcpyDeviceToHost);
-	cudaMemcpy(&time_used, time, sizeof(clock_t), cudaMemcpyDeviceToHost);
 	cudaFree(A_d);
 	cudaFree(B_d);
 	cudaFree(C_d);
 
 	for(int i = 0; i < W ; i++){
-        if(i % 10  == 0){
-            printf("\n");
+        if(i % 400  == 0){
+            //printf("\n");
+            //printf("\n");
         }
-        printf("%f ", C[i]);
+        //printf("%f ", C[i]);
 	}
 	printf("\n");
-	printf("time: %ldms\n", time_used);
+	printf("time: %ldms\n", end);
 	return 0;
 }

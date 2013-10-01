@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define W 1600
+#define W 51200
 
 void vector_gen(float* a, int size){
 	int i;
@@ -19,6 +19,8 @@ void vecAdd(float* A, float* B, float* C){
 }
 
 int main(){
+	clock_t start, time_used;
+	start = clock();
 	float* A, *B, *C;
 	A = (float*) malloc(sizeof(int) * W);
 	B = (float*) malloc(sizeof(int) * W);
@@ -26,8 +28,6 @@ int main(){
 	vector_gen(A, W);
 	vector_gen(B, W);
 
-	clock_t start, time_used;
-	start = clock();
 	vecAdd(A, B, C);
 	time_used = clock() - start;
 

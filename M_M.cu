@@ -3,6 +3,8 @@
 #include <cuda_runtime.h>
 
 #define X 16
+#define THREAD_NUM 512
+#define BLOCK_NUM 32
 
 bool InitCUDA(){
 	int count;
@@ -40,20 +42,18 @@ void matgen(float* a, int n){
 		}
 	}
 }	
-
-__global__ void MatrixMulKernel(float* Md, float* Nd, float* Pd, clock_t* time){
+__global__ void MatrixMulKernel(float* Md, float* Nd, float* Pd){
 	
 	int tx = threadIdx.x;
 	int ty = threadIdx.y;
 	float Pvalue = 0;
-	clock_t start = clock();
+
 	for(int k = 0; k < X; k++){
 		float Mdelement = Md[tx * X + k];
 		float Ndelement = Nd[k * X + ty];
 		Pvalue += Mdelement * Ndelement;
 	}
 	Pd[ty * X + tx] = Pvalue;
-	*time = clock() - start;
 }
 
 
@@ -62,7 +62,7 @@ int main(){
 		return 0;
 	printf("CUDA initialized.\n");
 
-	clock_t* time;
+	clock_t start = clock();
 	float* M, *N, *P;
     M = (float*) malloc(sizeof(float) * X * X);
     N = (float*) malloc(sizeof(float) * X * X);
@@ -80,27 +80,25 @@ int main(){
 	cudaMalloc((void**) &Nd, size);
 	cudaMemcpy(Nd, N, size, cudaMemcpyHostToDevice);
 	cudaMalloc((void**) &Pd, size);
-	cudaMalloc((void**) &time, sizeof(clock_t));
 
 	dim3 dimBlock(X, X);
 	dim3 dimGrid(1, 1);
-	MatrixMulKernel<<<dimGrid, dimBlock>>>(Md, Nd, Pd, time);
 
-	clock_t time_used;
 	cudaMemcpy(P, Pd, size, cudaMemcpyDeviceToHost);
-	cudaMemcpy(&time_used, time, sizeof(clock_t), cudaMemcpyDeviceToHost);
 	cudaFree(Md);
 	cudaFree(Nd);
 	cudaFree(Pd);
 
+	clock_t end = clock() - start;
+
 	for(int i = 0; i < X * X; i++){
         if(i % X  == 0){
-            printf("\n");
+            //printf("\n");
         }
-        printf("%f ", P[i]);
+        //printf("%f ", P[i]);
 	}
 	printf("\n");
-	printf("time: %ldms", time_used);
+	printf("time: %ldms", end);
 
 	return 0;
 }

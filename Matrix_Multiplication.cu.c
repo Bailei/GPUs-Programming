@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define N 16
+#define N 1024
 
 void matgen(int* a, int n){
 	int i, j;
