@@ -62,6 +62,7 @@ int main(){
     
 	int i;
     for(i = 8; i <= 1024; i *= 2){
+    clock_t start = clock();
 	float* M, *N, *P;
     M = (float*) malloc(sizeof(float) * i * i);
     N = (float*) malloc(sizeof(float) * i * i);
@@ -71,7 +72,6 @@ int main(){
 	matgen(M, i);
 	matgen(N, i);
 
-    clock_t start = clock();
 	int size = i * i * sizeof(float);
 	float* Md, *Nd, *Pd;
 
@@ -91,7 +91,7 @@ int main(){
 	cudaFree(Pd);
 
 	clock_t end = (clock() - start) / 1000;
-	printf("time: %ldms", end);
+	printf("%d * %d, uses time: %ldms\n", i, i, end);
     }
 
 	return 0;

@@ -38,7 +38,7 @@ int main(){
         matgen(b, i); 
         matmult(a, b, c, i);
 	    clock_t end = (clock() - start) / 1000;
-    	printf("time: %ldms", end);
+    	printf("%d * %d, uess time: %ldms\n", i, i, end);
     }
 	return 0;
 }

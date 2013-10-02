@@ -39,7 +39,9 @@ void vector_gen(float* a, int size){
 
 __global__ void vecAddkernel(float* A_d, float* B_d, float* C_d, int n){
 	int i = blockIdx.x * blockDim.x + threadIdx.x;
-	C_d[i] = A_d[i] + B_d[i];
+	if(i < n){
+        C_d[i] = A_d[i] + B_d[i];
+    }
 }
 
 int main(){
@@ -50,13 +52,13 @@ int main(){
     
     int i;
     for(i = 100; i < 200000000; i *= 2){
-    clock_t start = clock();
     float* A, *B, *C;
 	A = (float*) malloc(sizeof(float) * i);
 	B = (float*) malloc(sizeof(float) * i);
 	C = (float*) malloc(sizeof(float) * i);
 	vector_gen(A, i);
 	vector_gen(B, i);
+    clock_t start = clock();
     int size = i * sizeof(float);
 	float* A_d, *B_d, *C_d;
 

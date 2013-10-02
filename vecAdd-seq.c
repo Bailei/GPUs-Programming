@@ -21,12 +21,12 @@ void vecAdd(float* A, float* B, float* C, int x){
 int main(){
 	int i;
     for(i = 100; i < 200000000; i *= 2){
-    clock_t start = clock();
     A = (float*) malloc(sizeof(float) * i);
 	B = (float*) malloc(sizeof(float) * i);
 	C = (float*) malloc(sizeof(float) * i);
     vector_gen(A, i);
 	vector_gen(B, i);
+    clock_t start = clock();
 	vecAdd(A, B, C, i);
 	clock_t end = (clock() - start) / 1000;
 	printf("Length %d vector addion use time: %ldms\n", i, end);
